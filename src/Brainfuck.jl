@@ -1,6 +1,6 @@
 module Brainfuck
-    include("lexandparse.jl")
-    include("interpret.jl")
+include("lexandparse.jl")
+include("interpret.jl")
 
-    export brainfuck
+export brainfuck
 end
