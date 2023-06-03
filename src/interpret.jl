@@ -14,31 +14,19 @@ end
 
 function printbeforeop(
     op::Integer,
-    memory::Vector{Uint8},
+    memory::Vector{UInt8},
     memory_pointer::Integer,
 )
-    @printf(
-        STDERR,
-        "\n---\nBefore executing '%s': (%s, %d)\n",
-        opstring(op),
-        repr(memory),
-        memory_pointer
-    )
+    println(stderr,"\n---\nBefore executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)")
     return
 end
 
 function printafterop(
     op::Integer,
-    memory::Vector{Uint8},
+    memory::Vector{UInt8},
     memory_pointer::Integer,
 )
-    @printf(
-        STDERR,
-        "After executing '%s': (%s, %d)\n---\n\n",
-        opstring(op),
-        repr(memory),
-        memory_pointer
-    )
+    println(stderr,"After executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)\n---\n")
     return
 end
 
@@ -49,7 +37,7 @@ function interpret(
     io_out::IO = STDOUT
 )
     memory_pointer = 1
-    memory = zeros(Uint8, 1)
+    memory = zeros(UInt8, 1)
     opindex = 1
 
     n_ops = length(ops)
@@ -105,7 +93,7 @@ function interpret(
         # pointed at by the Memory Pointer.
         #
         elseif op == OP5
-            memory[memory_pointer] = read(io_in, Uint8)
+            memory[memory_pointer] = read(io_in, UInt8)
             opindex += 1
 
         # OP6: .
@@ -115,7 +103,7 @@ function interpret(
         #
         elseif op == OP6
             if debug
-                @printf(STDERR, "Printing '%s'\n", char(memory[memory_pointer]))
+                println(stderr,"Printing '$(char(memory[memory_pointer]))'")
             end
             print(io_out, char(memory[memory_pointer]))
             opindex += 1
@@ -185,8 +173,7 @@ function interpret(
 
         # Invalid operation
         else
-            msg = @sprintf("Unknown op code: %d", ops[opindex])
-            throw(ArgumentError(msg))
+            throw(ArgumentError("Unknown op code: $(ops[opindex])"))
         end
 
         if debug
