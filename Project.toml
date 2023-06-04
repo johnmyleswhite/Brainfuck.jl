@@ -1,0 +1,7 @@
+name = "Brainfuck"
+uuid = "ec8a48a9-9d79-4292-afd9-fc99c2fb4481"
+authors = ["John Myles White <jmw@johnmyleswhite.com>", "Simon Janssen <simon.janssen@umontreal.ca>"]
+version = "0.1.0"
+
+[deps]
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
