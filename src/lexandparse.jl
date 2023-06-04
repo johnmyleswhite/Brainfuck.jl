@@ -11,13 +11,13 @@ const OP8 = 8 # ]
 const char2op = Dict(zip(['>', '<', '+', '-', ',', '.', '[', ']'], 1:8))
 
 function lexandparse(s::String)
-    ops = Array(Int, 0)
+    ops = Int[]
 
     i = nextind(s, 0)
 
     line, character = 1, 0
 
-    while i <= endof(s)
+    while i <= length(s)
         chr = s[i]
         character += 1
 
@@ -27,7 +27,7 @@ function lexandparse(s::String)
                 character = 0
             end
             i = nextind(s, i)
-            if i <= endof(s)
+            if i <= length(s)
                 chr = s[i]
                 character += 1
             else
@@ -38,7 +38,7 @@ function lexandparse(s::String)
         if !(chr in ['>', '<', '+', '-', ',', '.', '[', ']'])
             throw(ArgumentError("Invalid token found at line $line, character $character"))
         else
-            push!(ops, char2op(chr))
+            push!(ops, char2op[chr])
         end
 
         i = nextind(s, i)

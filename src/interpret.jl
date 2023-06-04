@@ -6,7 +6,7 @@ end
 function printbeforeop(op::Integer, memory::Vector{UInt8}, memory_pointer::Integer)
     println(
         stderr,
-        "\n---\nBefore executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)"
+        "\n---\nBefore executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)",
     )
     return
 end
@@ -14,7 +14,7 @@ end
 function printafterop(op::Integer, memory::Vector{UInt8}, memory_pointer::Integer)
     println(
         stderr,
-        "After executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)\n---\n"
+        "After executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)\n---\n",
     )
     return
 end
@@ -22,8 +22,8 @@ end
 function interpret(
     ops::Vector{Int};
     debug::Bool = false,
-    io_in::IO = STDIN,
-    io_out::IO = STDOUT,
+    io_in::IO = stdin,
+    io_out::IO = stdout,
 )
     memory_pointer = 1
     memory = zeros(UInt8, 1)
@@ -65,7 +65,8 @@ function interpret(
             # Increment the array cell pointed at by the Memory Pointer.
             #
         elseif op == OP3
-            memory[memory_pointer] += 1
+            increment = x -> x == 0xff ? 0x00 : x + 1
+            memory[memory_pointer] = increment(memory[memory_pointer])
             opindex += 1
 
             # OP4: -
@@ -73,7 +74,8 @@ function interpret(
             # Decrement the array cell pointed at by the Memory Pointer.
             #
         elseif op == OP4
-            memory[memory_pointer] -= 1
+            decrement = x -> x == 0x00 ? 0xff : x - 1
+            memory[memory_pointer] = decrement(memory[memory_pointer])
             opindex += 1
 
             # OP5: ,
@@ -92,9 +94,9 @@ function interpret(
             #
         elseif op == OP6
             if debug
-                println(stderr, "Printing '$(char(memory[memory_pointer]))'")
+                println(stderr, "Printing '$(Char(memory[memory_pointer]))'")
             end
-            print(io_out, char(memory[memory_pointer]))
+            print(io_out, Char(memory[memory_pointer]))
             opindex += 1
 
             # OP7: [
@@ -173,6 +175,6 @@ function interpret(
     return
 end
 
-function brainfuck(s::String; debug::Bool = false, io_in::IO = STDIN, io_out::IO = STDOUT)
+function brainfuck(s::String; debug::Bool = false, io_in::IO = stdin, io_out::IO = stdout)
     interpret(lexandparse(s), debug = debug, io_in = io_in, io_out = io_out)
 end
