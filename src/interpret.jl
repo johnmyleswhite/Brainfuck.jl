@@ -1,43 +1,20 @@
 function opstring(op::Integer)
-    strings = [
-        ">",
-        "<",
-        "+",
-        "-",
-        ".",
-        ",",
-        "[",
-        "]",
-    ]
+    strings = [">", "<", "+", "-", ".", ",", "[", "]"]
     return strings[op]
 end
 
-function printbeforeop(
-    op::Integer,
-    memory::Vector{Uint8},
-    memory_pointer::Integer,
-)
-    @printf(
-        STDERR,
-        "\n---\nBefore executing '%s': (%s, %d)\n",
-        opstring(op),
-        repr(memory),
-        memory_pointer
+function printbeforeop(op::Integer, memory::Vector{UInt8}, memory_pointer::Integer)
+    println(
+        stderr,
+        "\n---\nBefore executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)",
     )
     return
 end
 
-function printafterop(
-    op::Integer,
-    memory::Vector{Uint8},
-    memory_pointer::Integer,
-)
-    @printf(
-        STDERR,
-        "After executing '%s': (%s, %d)\n---\n\n",
-        opstring(op),
-        repr(memory),
-        memory_pointer
+function printafterop(op::Integer, memory::Vector{UInt8}, memory_pointer::Integer)
+    println(
+        stderr,
+        "After executing '$(opstring(op))': ($(repr(memory)), $memory_pointer)\n---\n",
     )
     return
 end
@@ -45,11 +22,11 @@ end
 function interpret(
     ops::Vector{Int};
     debug::Bool = false,
-    io_in::IO = STDIN,
-    io_out::IO = STDOUT
+    io_in::IO = stdin,
+    io_out::IO = stdout,
 )
     memory_pointer = 1
-    memory = zeros(Uint8, 1)
+    memory = zeros(UInt8, 1)
     opindex = 1
 
     n_ops = length(ops)
@@ -72,10 +49,10 @@ function interpret(
             end
             opindex += 1
 
-        # OP2: <
-        #
-        # Move the Memory Pointer to the previous array cell.
-        #
+            # OP2: <
+            #
+            # Move the Memory Pointer to the previous array cell.
+            #
         elseif op == OP2
             # TODO: Confirm that this is appropriate
             if memory_pointer > 1
@@ -83,50 +60,52 @@ function interpret(
             end
             opindex += 1
 
-        # OP3: +
-        #
-        # Increment the array cell pointed at by the Memory Pointer.
-        #
+            # OP3: +
+            #
+            # Increment the array cell pointed at by the Memory Pointer.
+            #
         elseif op == OP3
-            memory[memory_pointer] += 1
+            increment = x -> x == 0xff ? 0x00 : x + 1
+            memory[memory_pointer] = increment(memory[memory_pointer])
             opindex += 1
 
-        # OP4: -
-        #
-        # Decrement the array cell pointed at by the Memory Pointer.
-        #
+            # OP4: -
+            #
+            # Decrement the array cell pointed at by the Memory Pointer.
+            #
         elseif op == OP4
-            memory[memory_pointer] -= 1
+            decrement = x -> x == 0x00 ? 0xff : x - 1
+            memory[memory_pointer] = decrement(memory[memory_pointer])
             opindex += 1
 
-        # OP5: ,
-        #
-        # Read a character from STDIN and put its ASCII value into the cell
-        # pointed at by the Memory Pointer.
-        #
+            # OP5: ,
+            #
+            # Read a character from STDIN and put its ASCII value into the cell
+            # pointed at by the Memory Pointer.
+            #
         elseif op == OP5
-            memory[memory_pointer] = read(io_in, Uint8)
+            memory[memory_pointer] = read(io_in, UInt8)
             opindex += 1
 
-        # OP6: .
-        #
-        # Print the character with ASCII value equal to the value in the cell
-        # pointed at by the Memory Pointer.
-        #
+            # OP6: .
+            #
+            # Print the character with ASCII value equal to the value in the cell
+            # pointed at by the Memory Pointer.
+            #
         elseif op == OP6
             if debug
-                @printf(STDERR, "Printing '%s'\n", char(memory[memory_pointer]))
+                println(stderr, "Printing '$(Char(memory[memory_pointer]))'")
             end
-            print(io_out, char(memory[memory_pointer]))
+            print(io_out, Char(memory[memory_pointer]))
             opindex += 1
 
-        # OP7: [
-        #
-        # Move to the command following the matching Ook? Ook! if the value in
-        # the cell pointed at by the Memory Pointer is zero. Note that
-        # Ook! Ook? and Ook? Ook! commands nest like pairs of parentheses, and
-        # matching pairs are defined in the same way as for parentheses.
-        #
+            # OP7: [
+            #
+            # Move to the command following the matching Ook? Ook! if the value in
+            # the cell pointed at by the Memory Pointer is zero. Note that
+            # Ook! Ook? and Ook? Ook! commands nest like pairs of parentheses, and
+            # matching pairs are defined in the same way as for parentheses.
+            #
         elseif op == OP7
             if memory[memory_pointer] == 0x00
                 level = 0
@@ -152,12 +131,12 @@ function interpret(
                 opindex += 1
             end
 
-        # OP8: ]
-        #
-        # Move to the command following the matching Ook! Ook? if the value in
-        # the cell pointed at by the Memory Pointer is non-zero. This involves
-        # traversing the ops array backwards.
-        #
+            # OP8: ]
+            #
+            # Move to the command following the matching Ook! Ook? if the value in
+            # the cell pointed at by the Memory Pointer is non-zero. This involves
+            # traversing the ops array backwards.
+            #
         elseif op == OP8
             if memory[memory_pointer] != 0x00
                 level = 0
@@ -183,10 +162,9 @@ function interpret(
                 opindex += 1
             end
 
-        # Invalid operation
+            # Invalid operation
         else
-            msg = @sprintf("Unknown op code: %d", ops[opindex])
-            throw(ArgumentError(msg))
+            throw(ArgumentError("Unknown op code: $(ops[opindex])"))
         end
 
         if debug
@@ -197,11 +175,6 @@ function interpret(
     return
 end
 
-function brainfuck(
-    s::String;
-    debug::Bool = false,
-    io_in::IO = STDIN,
-    io_out::IO = STDOUT
-)
+function brainfuck(s::String; debug::Bool = false, io_in::IO = stdin, io_out::IO = stdout)
     interpret(lexandparse(s), debug = debug, io_in = io_in, io_out = io_out)
 end

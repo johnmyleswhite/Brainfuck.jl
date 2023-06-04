@@ -8,19 +8,16 @@ const OP6 = 6 # .
 const OP7 = 7 # [
 const OP8 = 8 # ]
 
-function char2op(chr::Char)
-    const chars2ops = Dict(['>', '<', '+', '-', ',', '.', '[', ']'], 1:8)
-    return chars2ops[chr]
-end
+const char2op = Dict(zip(['>', '<', '+', '-', ',', '.', '[', ']'], 1:8))
 
 function lexandparse(s::String)
-    ops = Array(Int, 0)
+    ops = Int[]
 
     i = nextind(s, 0)
 
     line, character = 1, 0
 
-    while i <= endof(s)
+    while i <= length(s)
         chr = s[i]
         character += 1
 
@@ -30,7 +27,7 @@ function lexandparse(s::String)
                 character = 0
             end
             i = nextind(s, i)
-            if i <= endof(s)
+            if i <= length(s)
                 chr = s[i]
                 character += 1
             else
@@ -39,14 +36,9 @@ function lexandparse(s::String)
         end
 
         if !(chr in ['>', '<', '+', '-', ',', '.', '[', ']'])
-            msg = @sprintf(
-                "Invalid token found at line %d, character %d",
-                line,
-                character
-            )
-            throw(ArgumentError(msg))
+            throw(ArgumentError("Invalid token found at line $line, character $character"))
         else
-            push!(ops, char2op(chr))
+            push!(ops, char2op[chr])
         end
 
         i = nextind(s, i)

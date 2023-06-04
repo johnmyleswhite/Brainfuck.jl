@@ -5,14 +5,9 @@
 fatalerrors = length(ARGS) > 0 && ARGS[1] == "-f"
 anyerrors = false
 
-using Base.Test
-using Ook
+using Test
 
-my_tests = [
-    "lexandparse.jl",
-    "interpret.jl",
-    "programs.jl"
-]
+my_tests = ["lexandparse.jl", "interpret.jl", "programs.jl"]
 
 println("Running tests:")
 
